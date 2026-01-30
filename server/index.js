@@ -6,77 +6,65 @@ const port = 3000;
 app.use(cors());
 app.use(express.json());
 
+// Helper: Custom positions allow placing arrows exactly where the visual feature is.
+// Coordinates: [x, y, z]
+// y is usually -2 (height). 
+// x and z determine direction on the circle.
+// forward: [0, -2, -15], back: [0, -2, 15], right: [15, -2, 0], left: [-15, -2, 0]
+
 const locations = [
   {
     id: 'road',
-    image: 'panorama_road.jpg',
+    image: 'road.jpeg',
     links: {
-      forward: { id: 'front', label: 'Front Yard' }
+      forward: { 
+        id: 'garden', 
+        label: 'Enter Garden', 
+        position: [35, -15, -15] // Straight ahead
+      }
     }
   },
   {
-    id: 'front',
-    image: 'panorama_front.jpg',
+    id: 'garden',
+    image: 'garden.jpeg',
     links: {
-      forward: { id: 'porch', label: 'Porch' },
-      back: { id: 'road', label: 'Road' }
+      forward: { 
+        id: 'sitout', 
+        label: 'To Sitout',
+        position: [-30, -2, -10] // Example: Slightly to the right
+      },
+      back: { 
+        id: 'road', 
+        label: 'Back to Road',
+        position: [0, -2, 15] // Behind
+      }
     }
   },
   {
-    id: 'porch',
-    image: 'panorama_porch.jpg',
+    id: 'sitout',
+    image: 'sitout.jpeg',
     links: {
-      forward: { id: 'living', label: 'Living Room' }, // Enter the house
-      back: { id: 'front', label: 'Front Yard' }
+      forward: { 
+        id: 'entrance', 
+        label: 'Main Entrance',
+        position: [-5, -2, -15] // Example: Slightly left
+      },
+      back: { 
+        id: 'garden', 
+        label: 'Back to Garden',
+        position: [0, -2, 15] 
+      }
     }
   },
   {
-    id: 'living',
-    image: 'panorama_living.jpg',
+    id: 'entrance',
+    image: 'main entrence.jpeg',
     links: {
-      back: { id: 'porch', label: 'Exit to Porch' },
-      left: { id: 'kitchen', label: 'Kitchen' },
-      right: { id: 'hallway', label: 'Hallway' },
-      forward: { id: 'dining', label: 'Dining Room' }
-    }
-  },
-  {
-    id: 'kitchen',
-    image: 'panorama_kitchen.jpg',
-    links: {
-      right: { id: 'living', label: 'Living Room' },
-      forward: { id: 'dining', label: 'Dining Room' }
-    }
-  },
-  {
-    id: 'dining',
-    image: 'panorama_dining.jpg',
-    links: {
-      back: { id: 'living', label: 'Living Room' },
-      left: { id: 'kitchen', label: 'Kitchen' }
-    }
-  },
-  {
-    id: 'hallway',
-    image: 'panorama_hallway.jpg',
-    links: {
-      back: { id: 'living', label: 'Living Room' },
-      left: { id: 'bedroom', label: 'Master Bedroom' },
-      right: { id: 'bathroom', label: 'Bathroom' }
-    }
-  },
-  {
-    id: 'bedroom',
-    image: 'panorama_bedroom.jpg',
-    links: {
-      right: { id: 'hallway', label: 'Hallway' }
-    }
-  },
-  {
-    id: 'bathroom',
-    image: 'panorama_bathroom.jpg',
-    links: {
-      left: { id: 'hallway', label: 'Hallway' }
+      back: { 
+        id: 'sitout', 
+        label: 'Back to Sitout', 
+        position: [0, -2, 15]
+      }
     }
   }
 ];

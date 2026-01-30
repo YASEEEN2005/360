@@ -38,16 +38,20 @@ function PanoramaScene({ locationId, locations, onNavigate, isGyroEnabled }) {
         <meshBasicMaterial map={texture} side={THREE.BackSide} />
       </mesh>
       
-      {Object.entries(currentLocation.links).map(([dir, link]) => (
-        link && (
+      {Object.entries(currentLocation.links).map(([dir, link]) => {
+        if (!link) return null;
+        // Use custom position from backend if available, otherwise fallback to default direction
+        const position = link.position || arrowPositions[dir] || [0, 0, 0];
+        
+        return (
           <Arrow 
             key={dir}
-            position={arrowPositions[dir]}
+            position={position}
             onClick={() => onNavigate(link.id)}
-            label={link.label} // Pass label to Arrow
+            label={link.label}
           />
         )
-      ))}
+      })}
 
       {isGyroEnabled ? (
         <DeviceOrientationControls />
