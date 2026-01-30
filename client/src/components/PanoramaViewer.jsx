@@ -3,24 +3,29 @@ import { OrbitControls, useTexture, DeviceOrientationControls } from '@react-thr
 import * as THREE from 'three'
 import { useState, useEffect, Suspense } from 'react'
 import Arrow from './Arrow'
-import { locations } from '../data/locations'
 
-function PanoramaScene({ locationId, onNavigate, isGyroEnabled }) {
+function PanoramaScene({ locationId, locations, onNavigate, isGyroEnabled }) {
   const currentLocation = locations.find(loc => loc.id === locationId)
-  const texture = useTexture(currentLocation.image)
+  
+  // Resolve asset path dynamically
+  const imageUrl = new URL(`../assets/${currentLocation.image}`, import.meta.url).href
+  const texture = useTexture(imageUrl)
   
   // Preload neighbors
   useEffect(() => {
-    Object.values(currentLocation.links).forEach(nextId => {
-      if (nextId) {
-        const nextLoc = locations.find(loc => loc.id === nextId)
-        if (nextLoc) useTexture.preload(nextLoc.image)
+    Object.values(currentLocation.links).forEach(link => {
+      if (link && link.id) {
+        const nextLoc = locations.find(loc => loc.id === link.id)
+        if (nextLoc) {
+          const nextUrl = new URL(`../assets/${nextLoc.image}`, import.meta.url).href
+          useTexture.preload(nextUrl)
+        }
       }
     })
-  }, [currentLocation])
+  }, [currentLocation, locations])
 
   const arrowPositions = {
-    forward: [0, -2, -15], // Closer and higher
+    forward: [0, -2, -15],
     back: [0, -2, 15],
     left: [-15, -2, 0],
     right: [15, -2, 0]
@@ -33,17 +38,17 @@ function PanoramaScene({ locationId, onNavigate, isGyroEnabled }) {
         <meshBasicMaterial map={texture} side={THREE.BackSide} />
       </mesh>
       
-      {Object.entries(currentLocation.links).map(([dir, nextId]) => (
-        nextId && (
+      {Object.entries(currentLocation.links).map(([dir, link]) => (
+        link && (
           <Arrow 
             key={dir}
             position={arrowPositions[dir]}
-            onClick={() => onNavigate(nextId)}
+            onClick={() => onNavigate(link.id)}
+            label={link.label} // Pass label to Arrow
           />
         )
       ))}
 
-      {/* Conditionally use Gyro or Orbit controls */}
       {isGyroEnabled ? (
         <DeviceOrientationControls />
       ) : (
@@ -58,12 +63,27 @@ function PanoramaScene({ locationId, onNavigate, isGyroEnabled }) {
 }
 
 export default function PanoramaViewer() {
+  const [locations, setLocations] = useState([])
   const [currentId, setCurrentId] = useState('road')
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [opacity, setOpacity] = useState(0)
   const [isGyroEnabled, setIsGyroEnabled] = useState(false)
-  
-  // Clean up gyro state if it's not supported or on unmount
+  const [error, setError] = useState(null)
+
+  // Fetch locations from Backend
+  useEffect(() => {
+    fetch('http://localhost:3000/api/locations')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch locations')
+        return res.json()
+      })
+      .then(data => setLocations(data))
+      .catch(err => {
+        console.error(err)
+        setError(err.message)
+      })
+  }, [])
+
   useEffect(() => {
     return () => setIsGyroEnabled(false)
   }, [])
@@ -82,17 +102,37 @@ export default function PanoramaViewer() {
     }, 500)
   }
 
+  if (error) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-slate-900 text-white">
+        <div className="text-center">
+          <h2 className="text-xl font-bold mb-2">Error Loading Tour</h2>
+          <p className="text-red-400">{error}</p>
+          <p className="text-sm mt-4 text-slate-400">Make sure the backend server (port 3000) is running.</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (locations.length === 0) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-slate-900 text-white">
+        <p>Loading Tour...</p>
+      </div>
+    )
+  }
+
   return (
     <div className="w-full h-screen relative bg-black">
-      {/* Performance Optimization: Cap dpr at 2 for high density screens */}
       <Canvas 
         camera={{ position: [0, 0, 0.1] }}
         dpr={[1, 2]} 
-        gl={{ powerPreference: "high-performance", antialias: false }} // Disable antialias for performance
+        gl={{ powerPreference: "high-performance", antialias: false }}
       >
         <Suspense fallback={null}>
           <PanoramaScene 
             locationId={currentId} 
+            locations={locations}
             onNavigate={handleNavigate} 
             isGyroEnabled={isGyroEnabled}
           />

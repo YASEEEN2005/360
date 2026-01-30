@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
-import { Billboard } from '@react-three/drei'
+import { Billboard, Text } from '@react-three/drei'
 
-export default function Arrow({ position, onClick, ...props }) {
+export default function Arrow({ position, onClick, label, ...props }) {
   const [hovered, setHovered] = useState(false)
   const ref = useRef()
 
@@ -15,6 +15,21 @@ export default function Arrow({ position, onClick, ...props }) {
         scale={hovered ? 1.2 : 1}
         {...props}
       >
+        {/* Label specific to this arrow */}
+        {label && (
+          <Text
+            position={[0, 1.8, 0]} // Float above arrow
+            fontSize={0.4}
+            color="white"
+            anchorX="center"
+            anchorY="middle"
+            outlineWidth={0.02}
+            outlineColor="#000000"
+          >
+            {label}
+          </Text>
+        )}
+
         {/* Arrow Head */}
         <mesh position={[0, 0.6, 0]} scale={[2, 2, 2]}> {/* Scaled up */}
           <coneGeometry args={[0.3, 0.6, 32]} />
