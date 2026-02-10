@@ -15,12 +15,13 @@ app.use(express.json());
 const locations = [
   {
     id: 'road',
-    image: 'road.jpeg',
+    image: 'Image 2026-02-10 at 9.46.16 PM.jpeg',
     links: {
       forward: { 
         id: 'garden', 
-        label: 'Enter Garden', 
-        position: [35, -15, -15] // Straight ahead
+        label: '', 
+        position: [35, -15, -15], // Straight ahead
+        scale: 5 // Make this arrow 2x larger
       }
     }
   },
@@ -31,7 +32,8 @@ const locations = [
       forward: { 
         id: 'sitout', 
         label: 'To Sitout',
-        position: [-30, -2, -10] // Example: Slightly to the right
+        position: [-30, -2, -10],
+        scale: 5 // Example: Slightly to the right
       },
       back: { 
         id: 'road', 
@@ -42,7 +44,7 @@ const locations = [
   },
   {
     id: 'sitout',
-    image: 'sitout.jpeg',
+    image: 'App Image 2026-02-10 at 8.41.59 PM.jpeg',
     links: {
       forward: { 
         id: 'entrance', 
@@ -51,8 +53,9 @@ const locations = [
       },
       back: { 
         id: 'garden', 
-        label: 'Back to Garden',
-        position: [0, -2, 15] 
+        label: '',
+        position: [95, -40, 15] ,
+         scale: 8
       }
     }
   },

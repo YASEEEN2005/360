@@ -1,19 +1,40 @@
 import { useRef, useState } from 'react'
 import { Billboard, Text, Ring, Circle } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
-export default function Arrow({ position, onClick, label, ...props }) {
+export default function Arrow({ position, onClick, label, scale = 1, ...props }) {
   const [hovered, setHovered] = useState(false)
-  const ref = useRef()
+  const groupRef = useRef()
+  const ringRef = useRef()
+
+  // Animation Loop
+  useFrame((state) => {
+    if (ringRef.current) {
+      // Create a time-based pulse
+      const t = (state.clock.elapsedTime * 1.5) % 1
+      
+      // Scale goes from 1 to 2
+      const s = 1 + t
+      ringRef.current.scale.set(s, s, 1)
+      
+      // Opacity fades out as it gets larger (1 -> 0)
+      ringRef.current.material.opacity = 0.8 * (1 - t)
+    }
+  })
+
+  // baseScale allows passing a custom size from props (default 1)
+  // hovered adds a 10% increase
+  const finalScale = (scale || 1) * (hovered ? 1.1 : 1)
 
   return (
     <Billboard position={position} follow={true} lockX={false} lockY={false} lockZ={false}>
       <group
-        ref={ref}
+        ref={groupRef}
         onClick={onClick}
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
-        scale={hovered ? 1.1 : 1}
+        scale={finalScale}
         {...props}
       >
         {/* Label specific to this arrow */}
@@ -31,22 +52,29 @@ export default function Arrow({ position, onClick, label, ...props }) {
           </Text>
         )}
 
-        {/* Outer Ring (Border) */}
-        <Ring args={[0.4, 0.5, 32]} material-color="white" material-opacity={0.9} material-transparent />
-        
-        {/* Inner Circle (Background) */}
-        <Circle args={[0.4, 32]} material-color="black" material-opacity={0.4} material-transparent />
+        {/* Central Button */}
+        <group>
+            {/* Outer Ring (Border) */}
+            <Ring args={[0.38, 0.42, 32]} material-color="white" material-opacity={0.9} material-transparent />
+            
+            {/* Inner Circle (Background) */}
+            <Circle args={[0.38, 32]} material-color="black" material-opacity={0.4} material-transparent />
 
-        {/* Chevron Arrow (Using a Triangle or Shape) */}
-        <mesh position={[0, -0.05, 0.01]} rotation={[0, 0, 0]}>
-          <shapeGeometry args={[new THREE.Shape().moveTo(-0.2, -0.1).lineTo(0, 0.2).lineTo(0.2, -0.1).lineTo(0, 0.05)]} />
-          <meshBasicMaterial color="white" />
-        </mesh>
+            {/* Chevron Arrow */}
+            <mesh position={[0, -0.05, 0.01]} rotation={[0, 0, 0]}>
+            <shapeGeometry args={[new THREE.Shape().moveTo(-0.15, -0.1).lineTo(0, 0.15).lineTo(0.15, -0.1).lineTo(0, 0.02)]} />
+            <meshBasicMaterial color="white" />
+            </mesh>
+        </group>
 
-        {/* Pulse Effect Ring (Optional) */}
-        {hovered && (
-             <Ring args={[0.5, 0.55, 32]} material-color="white" material-opacity={0.5} material-transparent />
-        )}
+        {/* Animated Pulse Ring */}
+        <Ring 
+            ref={ringRef}
+            args={[0.42, 0.45, 32]} 
+            material-color="white" 
+            material-transparent 
+            position={[0, 0, -0.01]} // Slightly behind
+        />
       </group>
     </Billboard>
   )

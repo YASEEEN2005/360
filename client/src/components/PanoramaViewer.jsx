@@ -1,15 +1,29 @@
-import { Canvas } from '@react-three/fiber'
+import { Canvas, useThree } from '@react-three/fiber'
 import { OrbitControls, useTexture, DeviceOrientationControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { useState, useEffect, Suspense } from 'react'
 import Arrow from './Arrow'
+import LocationMenu from './LocationMenu'
 
 function PanoramaScene({ locationId, locations, onNavigate, isGyroEnabled }) {
   const currentLocation = locations.find(loc => loc.id === locationId)
+  const { gl } = useThree()
   
   // Resolve asset path dynamically
   const imageUrl = new URL(`../assets/${currentLocation.image}`, import.meta.url).href
   const texture = useTexture(imageUrl)
+  
+  // Optimize Texture for Clarity
+  useEffect(() => {
+    texture.mapping = THREE.EquirectangularReflectionMapping
+    texture.colorSpace = THREE.SRGBColorSpace
+    texture.minFilter = THREE.LinearFilter
+    texture.magFilter = THREE.LinearFilter
+    texture.wrapS = THREE.RepeatWrapping
+    texture.repeat.x = -1 // Flip texture horizontally to match inverted sphere (if needed) or just wrap
+    texture.anisotropy = gl.capabilities.getMaxAnisotropy()
+    texture.needsUpdate = true
+  }, [texture, gl])
   
   // Preload neighbors
   useEffect(() => {
@@ -33,8 +47,8 @@ function PanoramaScene({ locationId, locations, onNavigate, isGyroEnabled }) {
 
   return (
     <>
-      <mesh rotation={[0, -Math.PI / 2, 0]}>
-        <sphereGeometry args={[500, 60, 40]} />
+      <mesh rotation={[0, -Math.PI / 2, 0]} scale={[-1, 1, 1]}>
+        <sphereGeometry args={[500, 64, 64]} />
         <meshBasicMaterial map={texture} side={THREE.BackSide} />
       </mesh>
       
@@ -49,6 +63,7 @@ function PanoramaScene({ locationId, locations, onNavigate, isGyroEnabled }) {
             position={position}
             onClick={() => onNavigate(link.id)}
             label={link.label}
+            scale={link.scale} // Pass custom scale (optional)
           />
         )
       })}
@@ -73,6 +88,7 @@ export default function PanoramaViewer() {
   const [opacity, setOpacity] = useState(0)
   const [isGyroEnabled, setIsGyroEnabled] = useState(false)
   const [error, setError] = useState(null)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   // Fetch locations from Backend
   useEffect(() => {
@@ -131,7 +147,12 @@ export default function PanoramaViewer() {
       <Canvas 
         camera={{ position: [0, 0, 0.1] }}
         dpr={[1, 2]} 
-        gl={{ powerPreference: "high-performance", antialias: false }}
+        gl={{ 
+            powerPreference: "high-performance", 
+            antialias: true,
+            toneMapping: THREE.ACESFilmicToneMapping,
+            outputColorSpace: THREE.SRGBColorSpace
+        }}
       >
         <Suspense fallback={null}>
           <PanoramaScene 
@@ -144,7 +165,14 @@ export default function PanoramaViewer() {
       </Canvas>
       
       {/* UI Controls */}
-      <div className="absolute bottom-6 right-6 z-20 flex gap-2">
+      <div className="absolute bottom-6 right-6 z-20 flex gap-4">
+        <button
+            onClick={() => setIsMenuOpen(true)}
+            className="px-6 py-2 rounded-full font-bold backdrop-blur-md transition-all bg-white/10 text-white hover:bg-white/20 border border-white/10 shadow-lg hover:shadow-blue-500/20"
+        >
+            View More
+        </button>
+
         <button
           onClick={() => setIsGyroEnabled(!isGyroEnabled)}
           className={`px-4 py-2 rounded-full font-bold backdrop-blur-md transition-colors ${
@@ -157,9 +185,18 @@ export default function PanoramaViewer() {
         </button>
       </div>
 
+      {/* Location Menu */}
+      {isMenuOpen && (
+        <LocationMenu 
+            locations={locations} 
+            onSelect={handleNavigate} 
+            onClose={() => setIsMenuOpen(false)} 
+        />
+      )}
+
       {/* Transition Overlay */}
       <div 
-        className="absolute inset-0 pointer-events-none bg-black transition-opacity duration-500 ease-in-out z-50"
+        className="absolute inset-0 pointer-events-none bg-black transition-opacity duration-500 ease-in-out z-40"
         style={{ opacity: opacity }}
       />
     </div>
