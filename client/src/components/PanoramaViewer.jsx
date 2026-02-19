@@ -92,7 +92,8 @@ export default function PanoramaViewer() {
 
   // Fetch locations from Backend
   useEffect(() => {
-    fetch('http://localhost:3000/api/locations')
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    fetch(`${apiUrl}/api/locations`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch locations')
         return res.json()
