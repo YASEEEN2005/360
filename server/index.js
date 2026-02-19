@@ -15,7 +15,7 @@ app.use(express.json());
 const locations = [
   {
     id: 'road',
-    image: 'Image 2026-02-10 at 9.46.16 PM.jpeg',
+    image: '2026-02-12 at 7.36.35 PM.jpeg',
     links: {
       forward: { 
         id: 'garden', 
@@ -27,28 +27,28 @@ const locations = [
   },
   {
     id: 'garden',
-    image: 'garden.jpeg',
+    image: 'Gemini_Generated_Image_7vrkkh7vrkkh7vrk.png',
     links: {
       forward: { 
         id: 'sitout', 
-        label: 'To Sitout',
+        label: '',
         position: [-30, -2, -10],
         scale: 5 // Example: Slightly to the right
       },
       back: { 
         id: 'road', 
-        label: 'Back to Road',
+        label: '',
         position: [0, -2, 15] // Behind
       }
     }
   },
   {
     id: 'sitout',
-    image: 'App Image 2026-02-10 at 8.41.59 PM.jpeg',
+    image: 'Gemini_Generated_Image_lmrvollmrvollmrv.png',
     links: {
       forward: { 
         id: 'entrance', 
-        label: 'Main Entrance',
+        label: '',
         position: [-5, -2, -15] // Example: Slightly left
       },
       back: { 
@@ -59,17 +59,17 @@ const locations = [
       }
     }
   },
-  {
-    id: 'entrance',
-    image: 'main entrence.jpeg',
-    links: {
-      back: { 
-        id: 'sitout', 
-        label: 'Back to Sitout', 
-        position: [0, -2, 15]
-      }
-    }
-  }
+  // {
+  //   id: 'entrance',
+  //   image: 'main entrence.jpeg',
+  //   links: {
+  //     back: { 
+  //       id: 'sitout', 
+  //       label: '', 
+  //       position: [0, -2, 15]
+  //     }
+  //   }
+  // }
 ];
 
 app.get('/api/locations', (req, res) => {
