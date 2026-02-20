@@ -10,7 +10,7 @@ function PanoramaScene({ locationId, locations, onNavigate, isGyroEnabled }) {
   const { gl } = useThree()
   
   // Resolve asset path dynamically
-  const imageUrl = new URL(`../assets/${currentLocation.image}`, import.meta.url).href
+  const imageUrl = new URL(`..assets/${currentLocation.image}`, import.meta.url).href
   const texture = useTexture(imageUrl)
   
   // Optimize Texture for Clarity
@@ -31,7 +31,7 @@ function PanoramaScene({ locationId, locations, onNavigate, isGyroEnabled }) {
       if (link && link.id) {
         const nextLoc = locations.find(loc => loc.id === link.id)
         if (nextLoc) {
-          const nextUrl = new URL(`../assets/${nextLoc.image}`, import.meta.url).href
+          const nextUrl = new URL(`..assets/${nextLoc.image}`, import.meta.url).href
           useTexture.preload(nextUrl)
         }
       }
