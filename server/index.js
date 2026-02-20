@@ -27,7 +27,7 @@ const locations = [
   },
   {
     id: 'garden',
-    image: 'Gemini_Generated_Image_7vrkkh7vrkkh7vrk.png',
+    image: 'WhatsApp Image 2026-02-20 at 10.14.08 AM.jpeg',
     links: {
       forward: { 
         id: 'sitout', 
