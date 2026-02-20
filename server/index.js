@@ -15,7 +15,7 @@ app.use(express.json());
 const locations = [
   {
     id: 'road',
-    image: '2026-02-12 at 7.36.35 PM.jpeg',
+    image: 'WhatsApp Image 2026-02-20 at 10.14.06 AM.jpeg',
     links: {
       forward: { 
         id: 'garden', 
